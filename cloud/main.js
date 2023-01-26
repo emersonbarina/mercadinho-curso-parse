@@ -12,9 +12,19 @@ Parse.Cloud.define('get-list-product', async (req) => {
 	// Condições da query
 
 	// Executar
-	const resultProducts = await queryProducts.find({useMarterKey: true});
+	const resultProducts = await queryProducts.find({useMasterKey: true});
 
 	// Retornar
-	return resultProducts
+	return resultProducts.map(function (p) {
+		p = p.toJSON();
+		return {
+			id: p.objectId,
+			title: p.title,
+			description: p.description,
+			price: p.price,
+			unit: p.unit,
+			picture: p.picture != null ? p.picture.url : null,
+		}
+	});
 
 });
