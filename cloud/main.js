@@ -92,14 +92,11 @@ Parse.Cloud.define('signup', async (req) => {
 	} catch (e) {
 		throw 'INVALID_DATA'
 	}
-
-
-	
 });
 
 Parse.Cloud.define('login', async (req) => {
 	try {
-		const user = await Parse.User.logIn(req.params.email, req.params.password);
+		const resultUser = await Parse.User.logIn(req.params.email, req.params.password);
 		const userJson = resultUser.toJSON();
 		return formatUser(userJson);
 	} catch(e) {
