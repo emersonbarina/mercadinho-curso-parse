@@ -163,3 +163,19 @@ Parse.Cloud.define('add-item-to-cart', async (req) => {
 	}
 
 });
+
+Parse.Cloud.define('modify-quantity-item', async (req) => {
+	if(req.params.cartItemId == null) throw 'INVALID_CART_ITEM';
+	if(req.params.quantity == null) throw 'INVALID_CART_QUANTITY';
+
+	const cartItem = new CartItem();
+	cartItem.id = req.params.cartItemId;
+	if(req.params.quantity > 0) {
+		cartItem.set('quantity', req.params.quantity);
+		await cartItem.save(null, {useMasterKey: true});
+	} else {
+		await cartItem.destroy({useMasterKey: true});
+	}
+	
+});
+
