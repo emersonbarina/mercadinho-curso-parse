@@ -8,8 +8,15 @@ Parse.Cloud.define("hello", (request) => {
 
 Parse.Cloud.define('get-list-product', async (req) => {
 	const queryProducts = new Parse.Query(Product);
+	// params
+	const page = req.params.page || 0;
+	const itemsPerPage = req.params.itemsPerPage || 20;
+	if( itemsPerPage > 100) throw 'Quantidade de itens por página inválida';
 
 	// Condições da query
+	// -- Paginação
+	queryProducts.skip(itemsPerPage * page);
+	queryProducts.limit(itemsPerPage);
 
 	// Executar
 	const resultProducts = await queryProducts.find({useMasterKey: true});
