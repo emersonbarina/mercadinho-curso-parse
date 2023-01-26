@@ -13,6 +13,22 @@ function formatUser(userJson) {
 	};
 }
 
+function formatProduct(productJson) {
+	return {
+		id: productJson.objectId,
+		title: productJson.title,
+		description: productJson.description,
+		price: productJson.price,
+		unit: productJson.unit,
+		picture: productJson.picture != null ? productJson.picture.url : null,
+		category: {
+			title: productJson.category.title,
+			id: productJson.category.objectId
+		}
+	};
+}
+
+
 // Use Parse.Cloud.define to define as many cloud functions as you want.
 // For example:
 Parse.Cloud.define("hello", (request) => {
@@ -55,18 +71,7 @@ Parse.Cloud.define('get-list-product', async (req) => {
 	// Retornar
 	return resultProducts.map(function (p) {
 		p = p.toJSON();
-		return {
-			id: p.objectId,
-			title: p.title,
-			description: p.description,
-			price: p.price,
-			unit: p.unit,
-			picture: p.picture != null ? p.picture.url : null,
-			category: {
-				title: p.category.title,
-				id: p.category.objectId
-			}
-		}
+		return formatProduct(p);
 	});
 });
 
@@ -176,6 +181,20 @@ Parse.Cloud.define('modify-quantity-item', async (req) => {
 	} else {
 		await cartItem.destroy({useMasterKey: true});
 	}
-	
 });
 
+Parse.Cloud.define('get-cart-items', async (req) => {
+	const queryCartItems = new Parse.Query(CartItem);
+	queryCartItems.equalTo('user', req.user);
+	queryCartItems.include('product');
+	queryCartItems.include('product.category');
+	const resultCartItems = await queryCartItems.find({useMasterKey: true});
+	return resultCartItems.map(function(c) {
+		c = c.toJSON();
+		return {
+			id: c.objectId,
+			quantity: c.quantity,
+			product: formatProduct(c.product)
+		}
+	});
+});
