@@ -71,3 +71,32 @@ Parse.Cloud.define('get-list-category', async (req) => {
 	})
 	
 });
+
+Parse.Cloud.define('signup', async (req) => {
+	if(req.params.fullName == null) throw 'INVALID_FULLNAME';
+	if(req.params.phone == null) throw 'INVALID_PHONE';
+	if(req.params.cpf == null) throw 'INVALID_CPF';
+
+	const user = new Parse.User();
+	user.set("username", req.params.email);
+	user.set("email", req.params.email);
+	user.set("password", req.params.password);
+	user.set("fullName", req.params.fullName);
+	user.set("phone", req.params.phone);
+	user.set("cpf", req.params.cpf);
+  
+	const resultUser = await user.signUp(null, {useMasterKey: true});
+	const userJson = resultUser.toJSON();
+	
+	return {
+		id: userJson.objectId,
+		fullName: userJson.fullName,
+		email: userJson.email,
+		phone: userJson.phone,
+		cpf: userJson.cpf,
+		token: userJson.sessionToken,
+	};
+
+
+	
+});
