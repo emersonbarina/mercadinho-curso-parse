@@ -21,10 +21,12 @@ Parse.Cloud.define('get-list-product', async (req) => {
 		//busca por parte da palavra - Mais lento
 		//queryProducts.matches('title', '.*' + req.params.title + '.*');
 	}
-
 	// -- Paginação
 	queryProducts.skip(itemsPerPage * page);
 	queryProducts.limit(itemsPerPage);
+
+	// Includes
+	queryProducts.include('category');
 
 	// Executar
 	const resultProducts = await queryProducts.find({useMasterKey: true});
@@ -39,6 +41,10 @@ Parse.Cloud.define('get-list-product', async (req) => {
 			price: p.price,
 			unit: p.unit,
 			picture: p.picture != null ? p.picture.url : null,
+			category: {
+				title: p.category.title,
+				id: p.category.objectId
+			}
 		}
 	});
 
