@@ -1,4 +1,5 @@
 const Product = Parse.Object.extend('Product');
+const Category = Parse.Object.extend('Category');
 
 // Use Parse.Cloud.define to define as many cloud functions as you want.
 // For example:
@@ -21,6 +22,14 @@ Parse.Cloud.define('get-list-product', async (req) => {
 		//busca por parte da palavra - Mais lento
 		//queryProducts.matches('title', '.*' + req.params.title + '.*');
 	}
+
+	if(req.params.categoryId != null){
+		const category = new Category();
+		category.id = req.params.categoryId;
+
+		queryProducts.equalTo('category', category);
+	}
+
 	// -- Paginação
 	queryProducts.skip(itemsPerPage * page);
 	queryProducts.limit(itemsPerPage);
@@ -47,5 +56,18 @@ Parse.Cloud.define('get-list-product', async (req) => {
 			}
 		}
 	});
+});
 
+Parse.Cloud.define('get-list-category', async (req) => {
+	const queryCategories = new Parse.Query(Category);
+
+	const resultCategories = await queryCategories.find({useMasterKey: true});
+	return resultCategories.map( function (c) {
+		c = c.toJSON();
+		return {
+			title: c.title,
+			id: c.objectId
+		}
+	})
+	
 });
