@@ -14,6 +14,14 @@ Parse.Cloud.define('get-list-product', async (req) => {
 	if( itemsPerPage > 100) throw 'Quantidade de itens por página inválida';
 
 	// Condições da query
+	if(req.params.title != null) {
+		//busca por palavra inteira
+		queryProducts.fullText('title', req.params.title);
+
+		//busca por parte da palavra - Mais lento
+		//queryProducts.matches('title', '.*' + req.params.title + '.*');
+	}
+
 	// -- Paginação
 	queryProducts.skip(itemsPerPage * page);
 	queryProducts.limit(itemsPerPage);
