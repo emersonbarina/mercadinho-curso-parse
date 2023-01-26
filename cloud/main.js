@@ -1,6 +1,17 @@
 const Product = Parse.Object.extend('Product');
 const Category = Parse.Object.extend('Category');
 
+function formatUser(userJson) {
+	return {
+		id: userJson.objectId,
+		fullName: userJson.fullName,
+		email: userJson.email,
+		phone: userJson.phone,
+		cpf: userJson.cpf,
+		token: userJson.sessionToken,
+	};
+}
+
 // Use Parse.Cloud.define to define as many cloud functions as you want.
 // For example:
 Parse.Cloud.define("hello", (request) => {
@@ -104,13 +115,10 @@ Parse.Cloud.define('login', async (req) => {
 	}
 });
 
-function formatUser(userJson) {
-	return {
-		id: userJson.objectId,
-		fullName: userJson.fullName,
-		email: userJson.email,
-		phone: userJson.phone,
-		cpf: userJson.cpf,
-		token: userJson.sessionToken,
-	};
-}
+Parse.Cloud.define('validate-token', async (req) => {
+	try {
+		return formatUser(req.user.toJSON());
+	} catch(e) {
+		throw 'INVALID_TOKEN';
+	}
+});
