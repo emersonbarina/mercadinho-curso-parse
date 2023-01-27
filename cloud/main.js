@@ -3,11 +3,3 @@ require('./functions/cart')
 require('./functions/order')
 require('./functions/product')
 require('./functions/auxiliar')
-// For example:
-
-
-
-
-
-
-
