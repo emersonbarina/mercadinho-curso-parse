@@ -229,6 +229,7 @@ Parse.Cloud.define('checkout', async (req) => {
 	for(let item of resultCartItems) {
 		const orderItem = new OrderItem();
 		orderItem.set('order', savedOrder);
+		orderItem.set('user', req.user);
 		orderItem.set('product', item.get('product'));
 		orderItem.set('quantity', item.get('quantity'));
 		orderItem.set('price', item.toJSON().product.price);
@@ -271,7 +272,7 @@ Parse.Cloud.define('get-order-items', async (req) => {
 	const queryOrderItems = new Parse.Query(OrderItem);
 
 	queryOrderItems.equalTo('order', order);
-	
+	queryOrderItems.equalTo('user', req.user); //  Garantir mesmo usuário por segurança
 	queryOrderItems.include('product');
 	queryOrderItems.include('product.category');
 
