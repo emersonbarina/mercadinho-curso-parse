@@ -244,3 +244,45 @@ Parse.Cloud.define('checkout', async (req) => {
 		id: savedOrder.id
 	}
 });
+
+Parse.Cloud.define('get-orders', async (req) => {
+	if(req.user == null) throw 'INVALID_USER';
+
+	const queryOrders = new Parse.Query(Order);
+	queryOrders.equalTo('user', req.user);
+	const resultOrders = await queryOrders.find({useMasterKey: true});
+	return resultOrders.map(function (o) {
+		o = o.toJSON();
+		return {
+			id: o.objectId,
+			total: o.total,
+			createdAt: o.createdAt
+		}
+	});
+});
+
+Parse.Cloud.define('get-order-items', async (req) => {
+	if(req.user == null) throw 'INVALID_USER';
+	if(req.params.orderId == null) throw 'INVALID_ORDER';
+
+	const order = new Order();
+	order.id = req.params.orderId;
+
+	const queryOrderItems = new Parse.Query(OrderItem);
+
+	queryOrderItems.equalTo('order', order);
+	
+	queryOrderItems.include('product');
+	queryOrderItems.include('product.category');
+
+	const resultOrderItems = await queryOrderItems.find({useMasterKey: true});
+	return resultOrderItems.map(function (o) {
+		o = o.toJSON();
+		return {
+			id: o.objectId,
+			quantity: o.quantity,
+			price: o.price,
+			product: formatProduct(o.product)
+		}
+	});
+});
