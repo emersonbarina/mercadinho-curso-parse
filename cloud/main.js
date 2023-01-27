@@ -2,6 +2,8 @@ const Product = Parse.Object.extend('Product');
 const Category = Parse.Object.extend('Category');
 const CartItem = Parse.Object.extend('CartItem');
 const Order = Parse.Object.extend('Order');
+const OrderItem = Parse.Object.extend('OrderItem');
+
 
 function formatUser(userJson) {
 	return {
@@ -28,7 +30,6 @@ function formatProduct(productJson) {
 		}
 	};
 }
-
 
 // Use Parse.Cloud.define to define as many cloud functions as you want.
 // For example:
@@ -223,9 +224,23 @@ Parse.Cloud.define('checkout', async (req) => {
 	const order = new Order();
 	order.set('total',total);
 	order.set('user', req.user);
-	const saveOrder = await order.save(null, {useMasterKey: true});
-	return {
-		id: saveOrder.id
+	const savedOrder = await order.save(null, {useMasterKey: true});
+
+	for(let item of resultCartItems) {
+		const orderItem = new OrderItem();
+		orderItem.set('order', savedOrder);
+		orderItem.set('product', item.get('product'));
+		orderItem.set('quantity', item.get('quantity'));
+		orderItem.set('price', item.toJSON().product.price);
+		await orderItem.save(null, {useMasterKey: true});
+		// remove item cart
+		//await item.destroy({useMasterKey: true});
 	}
-	 
+
+	// remove all items cart to user
+	await Parse.Object.destroyAll(resultCartItems, {useMasterKey: true});
+
+	return {
+		id: savedOrder.id
+	}
 });
